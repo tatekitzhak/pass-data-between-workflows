@@ -2,14 +2,17 @@ name: Workflow B
 
 on:
   
-  push:
-    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'The Run ID of Workflow A to download artifacts from'
+        required: false
+        type: string
+
   workflow_run:
     workflows: ["Workflow A"]
     types: 
      - completed
-     
-  workflow_dispatch:
 
 jobs:
   
@@ -40,10 +43,19 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
+            let run_id = github.event_name === 'workflow_dispatch' 
+            ? context.payload.inputs.run_id 
+            : context.payload.workflow_run.id;
+
+            if (!run_id) {
+            throw new Error("No Run ID provided! If running manually, please provide a Run ID.");
+            }
+
             let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              run_id: context.payload.workflow_run.id,
+              # run_id: context.payload.workflow_run.id,
+              run_id: Number(run_id)
             });
 
             console.log('allArtifacts: ',allArtifacts)
