@@ -1,0 +1,98 @@
+name: Workflow B
+
+on:
+  
+  push:
+    branches: [ "main" ]
+  workflow_run:
+    workflows: ["Workflow A"]
+    types: 
+     - completed
+  # workflow_dispatch:
+
+jobs:
+  
+  run_on_workflow_a_success:
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      # Runs a single command using the runners shell
+      - name: Run a Workflow A success
+        run: echo "Hello, world orkflow B!"
+
+  download_context_artifact:
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/github-script@v8
+        with:
+          script: |
+            let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.payload.workflow_run.id,
+            });
+
+            console.log('allArtifacts: ',allArtifacts)
+
+
+            let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
+              return artifact.name == "context.json"
+            })[0];
+
+            console.log('matchArtifact: ',matchArtifact)
+
+            let download = await github.rest.actions.downloadArtifact({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              artifact_id: matchArtifact.id,
+              archive_format: 'zip',
+            });
+
+            console.log('download: ',download)
+      
+            let fs = require('fs');
+            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/context.zip`, Buffer.from(download.data));
+
+      - name: Unzip artifact
+        run: unzip context.zip
+
+      - name: Return parsed JSON
+        uses: actions/github-script@v8
+        id: return-parsed-json
+        with:
+          script: |
+            let fs = require('fs');
+            let data = fs.readFileSync('./context.json');
+            return JSON.parse(data);
+    outputs:
+      property_one: ${{ fromJSON(steps.return-parsed-json.outputs.result).prop_1 }} 
+      property_two: ${{ fromJSON(steps.return-parsed-json.outputs.result).prop_2 }}
+
+  log_context_values:
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    needs:
+      - download_context_artifact
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log Context Values
+        run: |
+          echo "${{ needs.download_context_artifact.outputs.property_one }}"
+          echo "${{ needs.download_context_artifact.outputs.property_two }}"

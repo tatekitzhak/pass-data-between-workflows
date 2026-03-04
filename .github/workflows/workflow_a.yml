@@ -1,0 +1,30 @@
+name: Workflow A
+
+on:
+  push:
+    branches: [ "main" ]
+ 
+  # workflow_dispatch:
+
+jobs:
+  workflow_a:
+    runs-on: ubuntu-latest
+    steps:
+      # Runs a single command using the runners shell
+      - name: Run a first steps
+        run: echo "Hello, world!"
+  producing_data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: create json file
+        run: |
+          printf '{
+            "prop_1": "Some value",  
+            "prop_2": true
+            }' >> context.json
+
+      - name: Upload JSON Data
+        uses: actions/upload-artifact@v4
+        with:
+          name: context.json
+          path: .
