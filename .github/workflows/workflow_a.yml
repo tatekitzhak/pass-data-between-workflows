@@ -4,8 +4,6 @@ on:
   push:
     branches: [ "main" ]
  
-  # workflow_dispatch:
-
 jobs:
   workflow_a:
     runs-on: ubuntu-latest

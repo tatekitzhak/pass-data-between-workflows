@@ -8,7 +8,8 @@ on:
     workflows: ["Workflow A"]
     types: 
      - completed
-  # workflow_dispatch:
+     
+  workflow_dispatch:
 
 jobs:
   
@@ -18,7 +19,6 @@ jobs:
       issues: write
       pull-requests: write
 
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       # Runs a single command using the runners shell
