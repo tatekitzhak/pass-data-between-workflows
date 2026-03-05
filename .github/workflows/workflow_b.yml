@@ -3,11 +3,11 @@ name: Workflow B
 on:
   
   workflow_dispatch:
-    inputs:
-      run_id:
-        description: 'The Run ID of Workflow A to download artifacts from'
-        required: false
-        type: string
+    # inputs:
+    #   run_id:
+    #     description: 'The Run ID of Workflow A to download artifacts from'
+    #     required: false
+    #     type: string
 
   workflow_run:
     workflows: ["Workflow A"]
@@ -43,13 +43,23 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
-            let run_id = github.event_name === 'workflow_dispatch' 
-            ? context.payload.inputs.run_id 
-            : context.payload.workflow_run.id;
+            let run_id;
 
-            if (!run_id) {
-            throw new Error("No Run ID provided! If running manually, please provide a Run ID.");
+            if (context.eventName === 'workflow_run') {
+              run_id = context.payload.workflow_run.id;
+            } else {
+              // Find the latest successful run of "Workflow A"
+              const response = await github.rest.actions.listWorkflowRuns({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'workflow_a.yml', // Use the actual filename of Workflow A
+                status: 'success',
+                per_page: 1
+              });
+              run_id = response.data.workflow_runs[0].id;
             }
+          
+            console.log(`Using Run ID: ${run_id}`);
 
             let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
               owner: context.repo.owner,
