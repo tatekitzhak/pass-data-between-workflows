@@ -96,7 +96,7 @@ jobs:
             let data = fs.readFileSync('./context.json');
             return JSON.parse(data);
     outputs:
-      property_one: ${{ fromJSON(steps.return-parsed-json.outputs.result).prop_1 }} 
+      property_one: ${{ fromJSON(steps.return-parsed-json.outputs.result).ec2_instance_id }} 
       property_two: ${{ fromJSON(steps.return-parsed-json.outputs.result).prop_2 }}
 
   log_context_values:
