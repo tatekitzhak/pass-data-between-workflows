@@ -62,14 +62,13 @@ jobs:
               run_id: run_id,
             });
 
-            console.log('allArtifacts: ',allArtifacts)
-
+            # console.log('allArtifacts: ',allArtifacts)
 
             let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
               return artifact.name == "context.json"
             })[0];
 
-            console.log('matchArtifact: ',matchArtifact)
+            # console.log('matchArtifact: ',matchArtifact)
 
             let download = await github.rest.actions.downloadArtifact({
               owner: context.repo.owner,
@@ -78,7 +77,7 @@ jobs:
               archive_format: 'zip',
             });
 
-            console.log('download: ',download)
+            # console.log('download: ',download)
       
             let fs = require('fs');
             fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/context.zip`, Buffer.from(download.data));
@@ -95,7 +94,7 @@ jobs:
             let data = fs.readFileSync('./context.json');
             return JSON.parse(data);
     outputs:
-      property_one: ${{ fromJSON(steps.return-parsed-json.outputs.result).prop_1 }} 
+      ec2_instance_id: ${{ fromJSON(steps.return-parsed-json.outputs.result).ec2_instance_id }} 
       property_two: ${{ fromJSON(steps.return-parsed-json.outputs.result).prop_2 }}
 
   log_context_values:
@@ -110,5 +109,5 @@ jobs:
     steps:
       - name: Log Context Values
         run: |
-          echo "${{ needs.download_context_artifact.outputs.property_one }}"
+          echo "${{ needs.download_context_artifact.outputs.ec2_instance_id }}"
           echo "${{ needs.download_context_artifact.outputs.property_two }}"

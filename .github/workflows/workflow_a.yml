@@ -17,7 +17,7 @@ jobs:
       - name: create json file
         run: |
           printf '{
-            "prop_1": "Some value",  
+            "ec2_instance_id": "ec2_instance_id value",  
             "prop_2": true
             }' >> context.json
 
