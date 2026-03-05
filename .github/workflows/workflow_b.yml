@@ -57,6 +57,7 @@ jobs:
           script: |
             console.log('process.env.LATEST_RUN_ID:', process.env.LATEST_RUN_ID)
             const run_id = Number(process.env.LATEST_RUN_ID);
+
             let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -72,20 +73,23 @@ jobs:
 
             console.log('matchArtifact: ',matchArtifact)
 
-            let download = await github.rest.actions.downloadArtifact({
+            let downloadArtifact = await github.rest.actions.downloadArtifact({
               owner: context.repo.owner,
               repo: context.repo.repo,
               artifact_id: matchArtifact.id,
               archive_format: 'zip',
             });
 
-            console.log('download: ',download)
+            console.log('downloadArtifact: ',downloadArtifact)
       
             let fs = require('fs');
-            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/ec2_instance.zip`, Buffer.from(download.data));
+            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/ec2_instance.zip`, Buffer.from(downloadArtifact.data));
 
       - name: Unzip artifact
-        run: unzip ec2_instance.zip
+        run: |
+          pwd
+          ls 
+          unzip ec2_instance.zip
 
       - name: Return parsed JSON
         uses: actions/github-script@v8
