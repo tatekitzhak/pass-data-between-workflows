@@ -25,7 +25,7 @@ jobs:
       - name: Run a Workflow A success
         run: echo "Hello, world orkflow B!"
 
-  download_context_artifact:
+  download_ec2_instance_artifact:
     permissions:
       contents: write
       issues: write
@@ -67,7 +67,7 @@ jobs:
 
 
             let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
-              return artifact.name == "context.json"
+              return artifact.name == "ec2_instance.json"
             })[0];
 
             console.log('matchArtifact: ',matchArtifact)
@@ -82,10 +82,10 @@ jobs:
             console.log('download: ',download)
       
             let fs = require('fs');
-            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/context.zip`, Buffer.from(download.data));
+            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/ec2_instance.zip`, Buffer.from(download.data));
 
       - name: Unzip artifact
-        run: unzip context.zip
+        run: unzip ec2_instance.zip
 
       - name: Return parsed JSON
         uses: actions/github-script@v8
@@ -93,23 +93,23 @@ jobs:
         with:
           script: |
             let fs = require('fs');
-            let data = fs.readFileSync('./context.json');
+            let data = fs.readFileSync('./ec2_instance.json');
             return JSON.parse(data);
     outputs:
       ec2_instance_id: ${{ fromJSON(steps.return-parsed-json.outputs.result).ec2_instance_id }} 
       property_two: ${{ fromJSON(steps.return-parsed-json.outputs.result).prop_2 }}
 
-  log_context_values:
+  log_ec2_instance_values:
     permissions:
       contents: write
       issues: write
       pull-requests: write
 
     needs:
-      - download_context_artifact
+      - download_ec2_instance_artifact
     runs-on: ubuntu-latest
     steps:
       - name: Log Context Values
         run: |
-          echo "${{ needs.download_context_artifact.outputs.ec2_instance_id }}"
-          echo "${{ needs.download_context_artifact.outputs.property_two }}"
+          echo "${{ needs.download_ec2_instance_artifact.outputs.ec2_instance_id }}"
+          echo "${{ needs.download_ec2_instance_artifact.outputs.property_two }}"
