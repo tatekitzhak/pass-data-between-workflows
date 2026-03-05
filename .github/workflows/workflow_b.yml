@@ -55,7 +55,9 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
+          
             const run_id = Number(process.env.LATEST_RUN_ID);
+
             let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -94,7 +96,7 @@ jobs:
             let data = fs.readFileSync('./context.json');
             return JSON.parse(data);
     outputs:
-      ec2_instance_id: ${{ fromJSON(steps.return-parsed-json.outputs.result).ec2_instance_id }} 
+      property_one: ${{ fromJSON(steps.return-parsed-json.outputs.result).ec2_instance_id }} 
       property_two: ${{ fromJSON(steps.return-parsed-json.outputs.result).prop_2 }}
 
   log_context_values:
@@ -109,5 +111,5 @@ jobs:
     steps:
       - name: Log Context Values
         run: |
-          echo "${{ needs.download_context_artifact.outputs.ec2_instance_id }}"
+          echo "${{ needs.download_context_artifact.outputs.property_one }}"
           echo "${{ needs.download_context_artifact.outputs.property_two }}"
