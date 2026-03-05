@@ -13,17 +13,17 @@ on:
 
 jobs:
   
-  run_on_workflow_a_success:
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
+  # run_on_workflow_a_success:
+  #   permissions:
+  #     contents: write
+  #     issues: write
+  #     pull-requests: write
 
-    runs-on: ubuntu-latest
-    steps:
-      # Runs a single command using the runners shell
-      - name: Run a Workflow A success
-        run: echo "Hello, world orkflow B!"
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # Runs a single command using the runners shell
+  #     - name: Run a Workflow A success
+  #       run: echo "Hello, world orkflow B!"
 
   download_ec2_instance_artifact:
     permissions:
@@ -83,13 +83,13 @@ jobs:
             console.log('downloadArtifact: ',downloadArtifact)
       
             let fs = require('fs');
-            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/ec2_instance.zip`, Buffer.from(downloadArtifact.data));
+            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/artifact_dir/ec2_instance.zip`, Buffer.from(downloadArtifact.data));
 
       - name: Unzip artifact
         run: |
           pwd
           ls 
-          unzip ec2_instance.zip
+          unzip artifact_dir/ec2_instance.zip
 
       - name: Return parsed JSON
         uses: actions/github-script@v8

@@ -16,6 +16,7 @@ jobs:
     steps:
       - name: create json file
         run: |
+          mkdir artifact_dir
           printf '{
             "ec2_instance_id": "ec2_instance_id value",  
             "prop_2": true
@@ -25,4 +26,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ec2_instance.json
-          path: .
+          path: /artifact_dir
