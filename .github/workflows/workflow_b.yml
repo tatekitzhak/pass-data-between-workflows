@@ -96,7 +96,7 @@ jobs:
             let data = fs.readFileSync('./context.json');
             return JSON.parse(data);
     outputs:
-      property_one: ${{ fromJSON(steps.return-parsed-json.outputs.result).ec2_instance_id }} 
+      ec2_instance_id: ${{ fromJSON(steps.return-parsed-json.outputs.result).ec2_instance_id }} 
       property_two: ${{ fromJSON(steps.return-parsed-json.outputs.result).prop_2 }}
 
   log_context_values:
@@ -111,5 +111,5 @@ jobs:
     steps:
       - name: Log Context Values
         run: |
-          echo "${{ needs.download_context_artifact.outputs.property_one }}"
+          echo "${{ needs.download_context_artifact.outputs.ec2_instance_id }}"
           echo "${{ needs.download_context_artifact.outputs.property_two }}"
