@@ -83,13 +83,13 @@ jobs:
             console.log('downloadArtifact: ',downloadArtifact)
       
             let fs = require('fs');
-            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/ec2_instance.zip`, Buffer.from(downloadArtifact.data));
+            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/art_dir/ec2_instance.zip`, Buffer.from(downloadArtifact.data));
 
       - name: Unzip artifact
         run: |
           pwd
           ls 
-          unzip ec2_instance.zip
+          unzip ./art_dir/ec2_instance.zip
 
       - name: Return parsed JSON
         uses: actions/github-script@v8
@@ -97,7 +97,7 @@ jobs:
         with:
           script: |
             let fs = require('fs');
-            let data = fs.readFileSync('./ec2_instance.json');
+            let data = fs.readFileSync('./art_dir/ec2_instance.json');
             return JSON.parse(data);
 
     outputs:
