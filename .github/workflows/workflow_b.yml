@@ -40,22 +40,22 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          WORKFLOW_RUN_ID=$(gh run list --workflow "Workflow A" --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+          RUN_ID=$(gh run list --workflow "Workflow A" --status success --limit 1 --json databaseId --jq '.[0].databaseId')
 
-          # Check if WORKFLOW_RUN_ID is empty or "null"
-          if [ -z "$WORKFLOW_RUN_ID" ] || [ "$WORKFLOW_RUN_ID" == "null" ]; then
+          # Check if RUN_ID is empty or "null"
+          if [ -z "$RUN_ID" ] || [ "$RUN_ID" == "null" ]; then
             echo "::error::No successful runs of 'Workflow A' found. Please run Workflow A first."
             exit 1
           fi
 
-          echo "LATEST_WORKFLOW_RUN_ID=$WORKFLOW_RUN_ID" >> $GITHUB_ENV
-          echo "Found Run ID; $WORKFLOW_RUN_ID"
+          echo "LATEST_RUN_ID=$RUN_ID" >> $GITHUB_ENV
+          echo "Found Run ID; $RUN_ID"
 
       - name: Download artifact
         uses: actions/github-script@v8
         with:
           script: |
-            const run_id = Number(process.env.LATEST_WORKFLOW_RUN_ID);
+            const run_id = Number(process.env.LATEST_RUN_ID);
             let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
               owner: context.repo.owner,
               repo: context.repo.repo,
