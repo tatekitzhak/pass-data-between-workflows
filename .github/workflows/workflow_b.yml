@@ -9,7 +9,7 @@ on:
     types: 
      - completed
      
-  # workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   
@@ -56,63 +56,63 @@ jobs:
           echo "LATEST_ID=$RUN_ID" >> $GITHUB_ENV
           echo "Found Run ID: $RUN_ID"
 
-      - name: Download artifact
-        uses: actions/github-script@v8
-        with:
-          script: |
-            let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: context.payload.workflow_run.id,
-            });
+  #     - name: Download artifact
+  #       uses: actions/github-script@v8
+  #       with:
+  #         script: |
+  #           let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo,
+  #             run_id: context.payload.workflow_run.id,
+  #           });
 
-            console.log('allArtifacts: ',allArtifacts)
+  #           console.log('allArtifacts: ',allArtifacts)
 
 
-            let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
-              return artifact.name == "context.json"
-            })[0];
+  #           let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
+  #             return artifact.name == "context.json"
+  #           })[0];
 
-            console.log('matchArtifact: ',matchArtifact)
+  #           console.log('matchArtifact: ',matchArtifact)
 
-            let download = await github.rest.actions.downloadArtifact({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              artifact_id: matchArtifact.id,
-              archive_format: 'zip',
-            });
+  #           let download = await github.rest.actions.downloadArtifact({
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo,
+  #             artifact_id: matchArtifact.id,
+  #             archive_format: 'zip',
+  #           });
 
-            console.log('download: ',download)
+  #           console.log('download: ',download)
       
-            let fs = require('fs');
-            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/context.zip`, Buffer.from(download.data));
+  #           let fs = require('fs');
+  #           fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/context.zip`, Buffer.from(download.data));
 
-      - name: Unzip artifact
-        run: unzip context.zip
+  #     - name: Unzip artifact
+  #       run: unzip context.zip
 
-      - name: Return parsed JSON
-        uses: actions/github-script@v8
-        id: return-parsed-json
-        with:
-          script: |
-            let fs = require('fs');
-            let data = fs.readFileSync('./context.json');
-            return JSON.parse(data);
-    outputs:
-      property_one: ${{ fromJSON(steps.return-parsed-json.outputs.result).prop_1 }} 
-      property_two: ${{ fromJSON(steps.return-parsed-json.outputs.result).prop_2 }}
+  #     - name: Return parsed JSON
+  #       uses: actions/github-script@v8
+  #       id: return-parsed-json
+  #       with:
+  #         script: |
+  #           let fs = require('fs');
+  #           let data = fs.readFileSync('./context.json');
+  #           return JSON.parse(data);
+  #   outputs:
+  #     property_one: ${{ fromJSON(steps.return-parsed-json.outputs.result).prop_1 }} 
+  #     property_two: ${{ fromJSON(steps.return-parsed-json.outputs.result).prop_2 }}
 
-  log_context_values:
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
+  # log_context_values:
+    # permissions:
+    #   contents: write
+    #   issues: write
+    #   pull-requests: write
 
-    needs:
-      - download_context_artifact
-    runs-on: ubuntu-latest
-    steps:
-      - name: Log Context Values
-        run: |
-          echo "${{ needs.download_context_artifact.outputs.property_one }}"
-          echo "${{ needs.download_context_artifact.outputs.property_two }}"
+    # needs:
+    #   - download_context_artifact
+    # runs-on: ubuntu-latest
+    # steps:
+    #   - name: Log Context Values
+    #     run: |
+    #       echo "${{ needs.download_context_artifact.outputs.property_one }}"
+    #       echo "${{ needs.download_context_artifact.outputs.property_two }}"
