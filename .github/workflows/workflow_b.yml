@@ -41,80 +41,86 @@ jobs:
 
       - name: Download artifact
         uses: actions/github-script@v8
-        with:
-          script: |
-            let run_id;
 
-            if (context.eventName === 'workflow_run') {
-              run_id = context.payload.workflow_run.id;
-            } else {
-              // Find the latest successful run of "Workflow A"
-              const response = await github.rest.actions.listWorkflowRuns({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                workflow_id: 'workflow_a.yml', // Use the actual filename of Workflow A
-                status: 'success',
-                per_page: 1
-              });
-              run_id = response.data.workflow_runs[0].id;
-            }
-          
-            console.log(`Using Run ID: ${run_id}`);
-
-            let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              # run_id: context.payload.workflow_run.id,
-              run_id: Number(run_id)
-            });
-
-            console.log('allArtifacts: ',allArtifacts)
-
-
-            let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
-              return artifact.name == "context.json"
-            })[0];
-
-            console.log('matchArtifact: ',matchArtifact)
-
-            let download = await github.rest.actions.downloadArtifact({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              artifact_id: matchArtifact.id,
-              archive_format: 'zip',
-            });
-
-            console.log('download: ',download)
-      
-            let fs = require('fs');
-            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/context.zip`, Buffer.from(download.data));
-
-      - name: Unzip artifact
-        run: unzip context.zip
-
-      - name: Return parsed JSON
-        uses: actions/github-script@v8
-        id: return-parsed-json
-        with:
-          script: |
-            let fs = require('fs');
-            let data = fs.readFileSync('./context.json');
-            return JSON.parse(data);
-    outputs:
-      property_one: ${{ fromJSON(steps.return-parsed-json.outputs.result).prop_1 }} 
-      property_two: ${{ fromJSON(steps.return-parsed-json.outputs.result).prop_2 }}
-
-  log_context_values:
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-
-    needs:
-      - download_context_artifact
-    runs-on: ubuntu-latest
-    steps:
-      - name: Log Context Values
+      - name: Get latest Run ID
         run: |
-          echo "${{ needs.download_context_artifact.outputs.property_one }}"
-          echo "${{ needs.download_context_artifact.outputs.property_two }}"
+          RUN_ID=$(gh run list --workflow "Workflow A" --status success --limit 1 --json databaseId --jq '.[0].databaseId')
+          echo "LATEST_ID=$RUN_ID" >> $GITHUB_ENV
+          echo "RUN_ID: $RUN_ID"
+  #       with:
+  #         script: |
+  #           let run_id;
+
+  #           if (context.eventName === 'workflow_run') {
+  #             run_id = context.payload.workflow_run.id;
+  #           } else {
+  #             // Find the latest successful run of "Workflow A"
+  #             const response = await github.rest.actions.listWorkflowRuns({
+  #               owner: context.repo.owner,
+  #               repo: context.repo.repo,
+  #               workflow_id: 'workflow_a.yml', // Use the actual filename of Workflow A
+  #               status: 'success',
+  #               per_page: 1
+  #             });
+  #             run_id = response.data.workflow_runs[0].id;
+  #           }
+          
+  #           console.log(`Using Run ID: ${run_id}`);
+
+  #           let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo,
+  #             # run_id: context.payload.workflow_run.id,
+  #             run_id: Number(run_id)
+  #           });
+
+  #           console.log('allArtifacts: ',allArtifacts)
+
+
+  #           let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
+  #             return artifact.name == "context.json"
+  #           })[0];
+
+  #           console.log('matchArtifact: ',matchArtifact)
+
+  #           let download = await github.rest.actions.downloadArtifact({
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo,
+  #             artifact_id: matchArtifact.id,
+  #             archive_format: 'zip',
+  #           });
+
+  #           console.log('download: ',download)
+      
+  #           let fs = require('fs');
+  #           fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/context.zip`, Buffer.from(download.data));
+
+  #     - name: Unzip artifact
+  #       run: unzip context.zip
+
+  #     - name: Return parsed JSON
+  #       uses: actions/github-script@v8
+  #       id: return-parsed-json
+  #       with:
+  #         script: |
+  #           let fs = require('fs');
+  #           let data = fs.readFileSync('./context.json');
+  #           return JSON.parse(data);
+  #   outputs:
+  #     property_one: ${{ fromJSON(steps.return-parsed-json.outputs.result).prop_1 }} 
+  #     property_two: ${{ fromJSON(steps.return-parsed-json.outputs.result).prop_2 }}
+
+  # log_context_values:
+  #   permissions:
+  #     contents: write
+  #     issues: write
+  #     pull-requests: write
+
+  #   needs:
+  #     - download_context_artifact
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Log Context Values
+  #       run: |
+  #         echo "${{ needs.download_context_artifact.outputs.property_one }}"
+  #         echo "${{ needs.download_context_artifact.outputs.property_two }}"
