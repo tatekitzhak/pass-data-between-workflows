@@ -83,13 +83,13 @@ jobs:
             console.log('downloadArtifact: ',downloadArtifact)
       
             let fs = require('fs');
-            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/artifact_dir/ec2_instance.zip`, Buffer.from(downloadArtifact.data));
+            fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/ec2_instance.zip`, Buffer.from(downloadArtifact.data));
 
       - name: Unzip artifact
         run: |
           pwd
           ls 
-          unzip artifact_dir/ec2_instance.zip
+          unzip ec2_instance.zip
 
       - name: Return parsed JSON
         uses: actions/github-script@v8
@@ -99,9 +99,10 @@ jobs:
             let fs = require('fs');
             let data = fs.readFileSync('./ec2_instance.json');
             return JSON.parse(data);
+
     outputs:
       ec2_instance_id: ${{ fromJSON(steps.return-parsed-json.outputs.result).ec2_instance_id }} 
-      property_two: ${{ fromJSON(steps.return-parsed-json.outputs.result).prop_2 }}
+      aws_region: ${{ fromJSON(steps.return-parsed-json.outputs.result).aws_region }}
 
   log_ec2_instance_values:
     permissions:
@@ -116,4 +117,4 @@ jobs:
       - name: Log Context Values
         run: |
           echo "${{ needs.download_ec2_instance_artifact.outputs.ec2_instance_id }}"
-          echo "${{ needs.download_ec2_instance_artifact.outputs.property_two }}"
+          echo "${{ needs.download_ec2_instance_artifact.outputs.aws_region }}"

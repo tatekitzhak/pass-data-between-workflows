@@ -16,14 +16,13 @@ jobs:
     steps:
       - name: create json file
         run: |
-          mkdir artifact_dir
           printf '{
             "ec2_instance_id": "ec2_instance_id value",  
-            "prop_2": true
+            "aws_region": "AWS_REGION"
             }' >> ec2_instance.json
 
       - name: Upload AWS EC2 Instance JSON Data
         uses: actions/upload-artifact@v4
         with:
           name: ec2_instance.json
-          path: /artifact_dir
+          path: .
