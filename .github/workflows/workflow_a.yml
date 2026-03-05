@@ -18,11 +18,11 @@ jobs:
         run: |
           printf '{
             "ec2_instance_id": "ec2_instance_id value",  
-            "aws_region": "AWS_REGION"
+            "aws_region": "AWS_REGION_NAME"
             }' >> ec2_instance.json
 
       - name: Upload AWS EC2 Instance JSON Data
         uses: actions/upload-artifact@v4
         with:
-          name: ./art_dir/ec2_instance.json
-          path: ./art_dir
+          name: ec2_instance.json
+          path: .
